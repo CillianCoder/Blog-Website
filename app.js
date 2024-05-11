@@ -22,8 +22,6 @@ const blogSchema = mongoose.Schema({
 
 const Post = mongoose.model("Post", blogSchema);
 
-let posts = []
-
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({ extended: true }));
