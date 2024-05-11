@@ -33,12 +33,12 @@ app.use(express.static("public"));
 app.get("/", function (req, res) {
 
   Post.find({})
-    .then(data => {
+    .then((data) => {
       res.render("home", {
         startContent: homeStartingContent, ejsPosts: data
       })
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     })
 
@@ -62,8 +62,8 @@ app.get("/posts/:post_id", function (req, res) {
   const postId = req.params.post_id;
 
   Post.find({})
-    .then(data => {
-      data.forEach(posts => {
+    .then((data) => {
+      data.forEach((posts) => {
         const storedId = posts.id;
     
         if (postId == storedId) {
@@ -74,7 +74,7 @@ app.get("/posts/:post_id", function (req, res) {
         }
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     })
 
