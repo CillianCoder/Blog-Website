@@ -1,9 +1,8 @@
-//jshint esversion:6
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const _ = require('lodash');
+const mongoose = require("mongoose");
 
 const homeStartingContent =
   "Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
@@ -14,21 +13,40 @@ const contactContent =
 
 const app = express();
 
-let posts = [];
+mongoose.connect("mongodb://localhost:27017/blogDB");
+
+const blogSchema = mongoose.Schema({
+  title: String,
+  content: String
+});
+
+const Post = mongoose.model("Post", blogSchema);
+
+let posts = []
 
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-app.get("/", function (req, res) {
-  const truncateParagraph = (content) => {
-    return content.substring(0, 100) + (content.length > 100 ? '...' : '');
-  };
 
-  res.render("home", { startContent: homeStartingContent, posts: posts.map((blog) => ({ ...blog, content: truncateParagraph(blog.content) })) });
-  // res.render("home", { startContent: homeStartingContent, posts });
+
+
+app.get("/", function (req, res) {
+
+  Post.find({})
+    .then(data => {
+      res.render("home", {
+        startContent: homeStartingContent, ejsPosts: data
+      })
+    })
+    .catch(err => {
+      console.log(err);
+    })
+
 });
+
+
 
 app.get("/about", function (req, res) {
   res.render("about", { aboutCon: aboutContent });
@@ -42,29 +60,36 @@ app.get("/compose", function (req, res) {
   res.render("compose");
 });
 
-app.get("/posts/:userInput", function (req, res) {
-  const userUrl = _.lowerCase(req.params.userInput);
+app.get("/posts/:post_id", function (req, res) {
+  const postId = req.params.post_id;
 
-  posts.forEach(function(post){
-    const storedTitle = _.lowerCase(post.title);
+  Post.find({})
+    .then(data => {
+      data.forEach(posts => {
+        const storedId = posts.id;
+    
+        if (postId == storedId) {
+          res.render("post", {
+            postHeading: posts.title,
+            postBody: posts.content
+          })
+        }
+      });
+    })
+    .catch(err => {
+      console.log(err);
+    })
 
-    if (storedTitle == userUrl) {
-      res.render("post", {
-        postHeading: post.title,
-        postBody: post.content
-      })
-    }
-  });
 
 });
 
 app.post("/publish", function (req, res) {
-  const post ={
+  const post = {
     title: req.body.postTitle,
     content: req.body.postContent
   };
 
-  posts.push(post);
+  Post.insertMany(post);
   res.redirect("/");
 });
 

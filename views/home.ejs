@@ -5,15 +5,18 @@
         <%= startContent %>
     </p>
 
-    <% posts.forEach((item)=> { %>
-        <h2>
-            <%= item.title %>
-        </h2>
+    <% ejsPosts.forEach(function(post){ %>
+
+        <h1>
+            <%=post.title%>
+        </h1>
         <p>
-            <%= item.content %>
+            <%=post.content.substring(0, 100) + " ..." %>
+                <a href="/posts/<%=post._id%>">Read More</a>
         </p>
-        <% if (item.content.length> 100) { %>
-            <a href="/posts/<%= item.title %>">Read More</a>
-            <% } %>
-                <% }); %>
-                    <%- include('partials/footer'); -%>
+
+
+        <% }) %>
+
+
+            <%- include("partials/footer"); -%>
